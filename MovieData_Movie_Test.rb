@@ -1,9 +1,10 @@
 #Dewar Tan PA2-Movies Assignment 
 #Due 9/11/2015
 
+
+
 #For evaluation/Testing of the Predict algorithm from the MovieData class
 class MovieTest
-
 #2D Array will initialized to MovieTest in the form of [[user_id, movie_id, rating, predictive_score]]
 	def initialize(results)
 		@results = results
@@ -146,54 +147,53 @@ class MovieData
 	end
 
 #Examines all the users that have rated the movie alters their ratings based on unique preferences of other movies
-def movie_rating_versus_average(movie_id)
-	movie_score = 0.0
-	list_of_viewers = viewers("#{movie_id}")
-	list_of_viewers.each do |user|
-		movie_score += user_rating_versus_average(user) #Inferring how other people would have rated this movie based on others they've seen
+	def movie_rating_versus_average(movie_id)
+		movie_score = 0.0
+		list_of_viewers = viewers("#{movie_id}")
+		list_of_viewers.each do |user|
+			movie_score += user_rating_versus_average(user) #Inferring how other people would have rated this movie based on others they've seen
+		end
+		return (movie_score / list_of_viewers.length)
 	end
-	return (movie_score / list_of_viewers.length)
-end
 
 
 #Returns a similary score of 0.0 to 1.0 based on their movie/ratings
 	def similarity(user1, user2)
-		ratings_similarity = 0
-		filtered_similarities = @movie_rankings.select {|movies, reviews| reviews.has_key?(user1) && reviews.has_key?(user2)} #grabs all the movies that user 1 and 2 have seen
-		filtered_similarities.each do |movie|
-			user_1_rating = movie[1]["#{user1}"].to_i
-			user_2_rating = movie[1]["#{user2}"].to_i
-			ratings_similarity += (user_1_rating-user_2_rating).abs.to_f #Differences in user ratings
+			ratings_similarity = 0
+			filtered_similarities = @movie_rankings.select {|movies, reviews| reviews.has_key?(user1) && reviews.has_key?(user2)} #grabs all the movies that user 1 and 2 have seen
+			filtered_similarities.each do |movie|
+				user_1_rating = movie[1]["#{user1}"].to_i
+				user_2_rating = movie[1]["#{user2}"].to_i
+				ratings_similarity += (user_1_rating-user_2_rating).abs.to_f #Differences in user ratings
+			end
+			return (ratings_similarity/filtered_similarities.length).to_f/5 #compare user difference in rating similarity out of 5
 		end
-		return (ratings_similarity/filtered_similarities.length).to_f/5 #compare user difference in rating similarity out of 5
-	end
 
 
 #Finds and sorts a list of users whom are most similar to given user based on review of same movies and similariy score
-def most_similar(checking_user)
-		list_similar_users = Hash.new() #List for similar users
-		filtered_results = @movie_rankings.select {|key, value| value.has_key?(checking_user)} #Selects all the movies in which user has also reviewed
-		filtered_results.each do |movie, users|		
-			users.each do |user_id, rating|
-				list_similar_users[user_id] = similarity(checking_user, user_id)
+	def most_similar(checking_user)
+			list_similar_users = Hash.new() #List for similar users
+			filtered_results = @movie_rankings.select {|key, value| value.has_key?(checking_user)} #Selects all the movies in which user has also reviewed
+			filtered_results.each do |movie, users|		
+				users.each do |user_id, rating|
+					list_similar_users[user_id] = similarity(checking_user, user_id)
+				end
 			end
+			return list_similar_users.sort_by{|user_id, score| -score} #sorts the occurences of similarity	
 		end
-		return list_similar_users.sort_by{|user_id, score| -score} #sorts the occurences of similarity	
-	end
 
 
 #runs the predictive algorithim above k times and defaults to size of k if not specified
-def run_test(k= @test_set.size)
-	prediction_results = []
-	for i in 0...k do
-		movie_id = @test_set[i][0]
-		user_id =  @test_set[0][1].first[0] #Grabs the first rating from my nested data structure hash
-		rating =  @test_set[0][1].first[1] 
-		prediction_results.push([user_id, movie_id, rating, predict(movie_id, user_id)])
+	def run_test(k= @test_set.size)
+		prediction_results = []
+		for i in 0...k do
+			movie_id = @test_set[i][0]
+			user_id =  @test_set[0][1].first[0] #Grabs the first rating from my nested data structure hash
+			rating =  @test_set[0][1].first[1] 
+			prediction_results.push([user_id, movie_id, rating, predict(movie_id, user_id)])
+		end
+		return MovieTest.new(prediction_results)
 	end
-	return MovieTest.new(prediction_results)
-end
-
 end
 
 #Short test below to see if it works
