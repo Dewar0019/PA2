@@ -1,5 +1,5 @@
 #Dewar Tan PA2-Movies Assignment 
-
+#Due 9/11/2015
 
 #For evaluation/Testing of the Predict algorithm from the MovieData class
 class MovieTest
@@ -53,7 +53,7 @@ class MovieData
 		@test_set = test_set
 		else
 		@movie_rankings = load_data("#{path}/#{test_set}.base") #rankings of the movies sorted from most reviewed at index 0
-		@test_set = load_data("#{path}/#{test_set}.test")
+		@test_set = load_data("#{path}/#{test_set}.test") #loads in test file
 		end	
 	end
 
@@ -119,7 +119,7 @@ class MovieData
 		user_evidence_score = user_rating_versus_average("#{user_id}")
 		movie_evidence_score = movie_rating_versus_average("#{movie_id}")
 		score = (user_evidence_score+movie_evidence_score)/2
-		if(score >= 5)  #returns the score 5.0 if it is bigger than 
+		if(score >= 5)  #returns the score 5.0 if it is bigger than the given range
 			return 5.0
 		else
 			return score
@@ -127,7 +127,7 @@ class MovieData
 	end
 
 #For all the movies the user has seen how does typically rate them versus the average
-# weighted more heavily on user_rating if it differs from average to exemplify succinct preferences
+#weighted more heavily on user_rating if it differs from average to exemplify succinct preferences
 	def user_rating_versus_average(user_id)
 		score = 0.0
 		list_of_movies = movies(user_id)
@@ -136,7 +136,7 @@ class MovieData
 				user_rating = rating("#{user_id}", movie)
 				average_rating= popularity(movie)
 				if (average_rating-user_rating).abs >= 1.5
-					weighted += 1
+					weighted += 10
 					score += user_rating*10 #weighted more heavily indicating user preference over average/common ratings
 				else
 					score += average_rating
@@ -145,7 +145,7 @@ class MovieData
 			return score / (weighted + list_of_movies.length).to_f
 	end
 
-#Gathers the 
+#Examines all the users that have rated the movie alters their ratings based on unique preferences of other movies
 def movie_rating_versus_average(movie_id)
 	movie_score = 0.0
 	list_of_viewers = viewers("#{movie_id}")
@@ -163,9 +163,9 @@ end
 		filtered_similarities.each do |movie|
 			user_1_rating = movie[1]["#{user1}"].to_i
 			user_2_rating = movie[1]["#{user2}"].to_i
-			ratings_similarity += (user_1_rating-user_2_rating).abs.to_f
+			ratings_similarity += (user_1_rating-user_2_rating).abs.to_f #Differences in user ratings
 		end
-		return (ratings_similarity/filtered_similarities.length).to_f/5
+		return (ratings_similarity/filtered_similarities.length).to_f/5 #compare user difference in rating similarity out of 5
 	end
 
 
@@ -182,7 +182,7 @@ def most_similar(checking_user)
 	end
 
 
-#runs the predict function above k times and defaults to size of size if not specified
+#runs the predictive algorithim above k times and defaults to size of k if not specified
 def run_test(k= @test_set.size)
 	prediction_results = []
 	for i in 0...k do
@@ -196,11 +196,14 @@ end
 
 end
 
+#Short test below to see if it works
 z = MovieData.new("ml-100k", :u1)
 
-w = z.run_test(5)
+w = z.run_test(30)
 
 print w.to_a
+
+
 
 
 
