@@ -1,27 +1,34 @@
+#Dewar Tan PA2-Movies Assignment 
+
+
+#For evaluation/Testing of the Predict algorithm from the MovieData class
 class MovieTest
 
+#2D Array will initialized to MovieTest in the form of [[user_id, movie_id, rating, predictive_score]]
 	def initialize(results)
 		@results = results
 	end
 
+#Calculates the average/mean of the given input of all results
 	def mean
 		average= 0
 		for i in 0..results.size
-			average += results[i][3]
+			average += results[i][3] #grabs the predictive_score
 		end
 	 return average/results.size
 	end
 
+#Calculation for std deviation between predictive scores
 	def stddev
 		average = mean()
 		variance = 0.0
 		for i in 0..results.size
-			variance += @results[i][3]-average ** 2
+			variance += @results[i][3]-average ** 2 
 		end
 	return variance/results.size
 	end
 
-
+#Calculation for root mean square
 	def rms
 		mean = 0.0
 		for i in 0..results.size
@@ -30,16 +37,14 @@ class MovieTest
 		return Math.sqrt(mean/@results.size)
 	end
 
+#returns the array that it was passed
 	def to_a
 		return @results
-	end
-	
+	end	
 end
 
 
-
-
-
+#Takes in a movie data file and performs analyses based on user ratings from 1-5
 class MovieData
 	attr_accessor :movie_rankings, :test_set
 	def initialize(path, test_set= [])
@@ -114,8 +119,8 @@ class MovieData
 		user_evidence_score = user_rating_versus_average("#{user_id}")
 		movie_evidence_score = movie_rating_versus_average("#{movie_id}")
 		score = (user_evidence_score+movie_evidence_score)/2
-		if(score >= 5)
-			return 5
+		if(score >= 5)  #returns the score 5.0 if it is bigger than 
+			return 5.0
 		else
 			return score
 		end
@@ -193,7 +198,7 @@ end
 
 z = MovieData.new("ml-100k", :u1)
 
-w = z.run_test(10)
+w = z.run_test(5)
 
 print w.to_a
 
