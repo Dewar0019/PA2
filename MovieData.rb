@@ -175,7 +175,7 @@ now = Time.now()
 # puts "rms: #{c.rms}"
 # print "array: #{c.to_a}\n"
 
-d = z.run_test(100)
+d = z.run_test(80)
 puts "mean: #{d.mean}"
 puts "stddev: #{d.stddev}"
 puts "rms: #{d.rms}"
