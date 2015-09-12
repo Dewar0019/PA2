@@ -1,52 +1,10 @@
 #Dewar Tan PA2-Movies Assignment 
 #Due 9/11/2015
 
-
-
-#For evaluation/Testing of the Predict algorithm from the MovieData class
-class MovieTest
-#2D Array will initialized to MovieTest in the form of [[user_id, movie_id, rating, predictive_score]]
-	def initialize(results)
-		@results = results
-	end
-
-#Calculates the average/mean of the given input of all results
-	def mean
-		average= 0
-		for i in 0..results.size
-			average += results[i][3] #grabs the predictive_score
-		end
-	 return average/results.size
-	end
-
-#Calculation for std deviation between predictive scores
-	def stddev
-		average = mean()
-		variance = 0.0
-		for i in 0..results.size
-			variance += @results[i][3]-average ** 2 
-		end
-	return variance/results.size
-	end
-
-#Calculation for root mean square
-	def rms
-		mean = 0.0
-		for i in 0..results.size
-			mean += @results[i][3] **2
-		end
-		return Math.sqrt(mean/@results.size)
-	end
-
-#returns the array that it was passed
-	def to_a
-		return @results
-	end	
-end
-
+require "./MovieTest.rb"
 
 #Takes in a movie data file and performs analyses based on user ratings from 1-5
-class MovieData
+class MovieData < MovieTest
 	attr_accessor :movie_rankings, :test_set
 	def initialize(path, test_set= [])
 		if test_set == []
@@ -119,12 +77,8 @@ class MovieData
 	def predict(user_id, movie_id)
 		user_evidence_score = user_rating_versus_average("#{user_id}")
 		movie_evidence_score = movie_rating_versus_average("#{movie_id}")
-		score = (user_evidence_score+movie_evidence_score)/2
-		if(score >= 5)  #returns the score 5.0 if it is bigger than the given range
-			return 5.0
-		else
-			return score
-		end
+		user_closest_score = movie_evidence_score.min_by { |user_id, user_adjusted_rating| (user_adjusted_rating - user_evidence_score).abs }[0] #grabs the user_id with the most similar adjusted ratings
+		return rating("#{user_closest_score}", "#{movie_id}")
 	end
 
 #For all the movies the user has seen how does typically rate them versus the average
@@ -137,8 +91,8 @@ class MovieData
 				user_rating = rating("#{user_id}", movie)
 				average_rating= popularity(movie)
 				if (average_rating-user_rating).abs >= 1.5
-					weighted += 10
-					score += user_rating*10 #weighted more heavily indicating user preference over average/common ratings
+					weighted += 1
+					score += user_rating*20 #weighted more heavily indicating user preference over average/common ratings
 				else
 					score += average_rating
 				end
@@ -148,12 +102,12 @@ class MovieData
 
 #Examines all the users that have rated the movie alters their ratings based on unique preferences of other movies
 	def movie_rating_versus_average(movie_id)
-		movie_score = 0.0
+		find_similar_user = Hash.new()
 		list_of_viewers = viewers("#{movie_id}")
 		list_of_viewers.each do |user|
-			movie_score += user_rating_versus_average(user) #Inferring how other people would have rated this movie based on others they've seen
+			find_similar_user[user] = user_rating_versus_average(user).to_f #Inferring how other people would have rated this movie based on others they've seen
 		end
-		return (movie_score / list_of_viewers.length)
+		return find_similar_user
 	end
 
 
@@ -194,17 +148,41 @@ class MovieData
 		end
 		return MovieTest.new(prediction_results)
 	end
+
+
 end
 
 #Short test below to see if it works
-z = MovieData.new("ml-100k", :u1)
 
-w = z.run_test(30)
+z = MovieData.new("ml-100k", :u3)
 
-print w.to_a
+now = Time.now()
+# a = z.run_test(5)
+# puts "mean: #{a.mean}"
+# puts "stddev: #{a.stddev}"
+# puts "rms: #{a.rms}"
+# print "array: #{a.to_a}\n"
 
+# b = z.run_test(10)
+# puts "mean: #{b.mean}"
+# puts "stddev: #{b.stddev}"
+# puts "rms: #{b.rms}"
+# print "array: #{b.to_a}\n"
 
+# c = z.run_test(20)
+# puts "mean: #{c.mean}"
+# puts "stddev: #{c.stddev}"
+# puts "rms: #{c.rms}"
+# print "array: #{c.to_a}\n"
 
+d = z.run_test(100)
+puts "mean: #{d.mean}"
+puts "stddev: #{d.stddev}"
+puts "rms: #{d.rms}"
+print "array: #{d.to_a}\n"
+
+puts "Time Taken to Complete:"
+puts Time.now() - now
 
 
 
